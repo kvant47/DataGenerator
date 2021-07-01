@@ -3,7 +3,7 @@
 
 class DataGenerator{
     int time;
-    int deltaTime;
+    double deltaTime;
     char identity;
 
 protected:
@@ -11,10 +11,10 @@ protected:
     virtual void compute() = 0;
 
 public:
-    void setDeltaTime(int);
+    void setDeltaTime(double);
     void setIdentity(char);
 
-    int getDeltaTime();
+    double getDeltaTime();
     int getTime();
     char getIdentity();
     virtual ~DataGenerator() = 0;
