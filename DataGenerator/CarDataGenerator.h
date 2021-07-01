@@ -37,9 +37,9 @@ public:
     double getConsumptionFuel();
     int getGear();
 
-    CarDataGenerator(int) {} //===== Первый констрктор. Все параметры случайны
-    CarDataGenerator(int deltaTime, double speed, double fuelLevel, double temperature, double consumptionFuel) {} //===== Второй констрктор. Все параметры указаны
-    CarDataGenerator(int deltaTime, double minSpeed, double maxSpeed, double minFuelLevel, double maxFuelLevel, double minTemperature, double maxTemperature, double minConsumptionFuel, double maxConsumptionFuel) {} //===== Третий констрктор. Все параметры заданые в диапазоне между отчаянием и надеждой
+    CarDataGenerator(double deltaTime) {} //===== Первый констрктор. Все параметры случайны
+    CarDataGenerator(double deltaTime, double speed, double fuelLevel, double temperature, double consumptionFuel) {} //===== Второй констрктор. Все параметры указаны
+    CarDataGenerator(double deltaTime, double minSpeed, double maxSpeed, double minFuelLevel, double maxFuelLevel, double minTemperature, double maxTemperature, double minConsumptionFuel, double maxConsumptionFuel) {} //===== Третий констрктор. Все параметры заданые в диапазоне между отчаянием и надеждой
 
     void  compute() override {}
     ~CarDataGenerator()override;
