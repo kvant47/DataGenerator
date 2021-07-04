@@ -8,7 +8,6 @@ class HarmonicMotionDataGenerator : public DataGenerator {
     double phase;
     double x;
 
-public:
     HarmonicMotionDataGenerator(int);
 
     HarmonicMotionDataGenerator(double deltaTime);
@@ -19,6 +18,7 @@ public:
     void setPhase(double);
     void setX(double);
 
+    public:
     double getAmplitude();
     double getCiclicFrequency();
     double getPhase();

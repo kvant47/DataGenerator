@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 void CarDataGenerator::findGear() {
     if (speed == 0) gear = 0;
     else
@@ -33,7 +34,7 @@ void CarDataGenerator::findRotationalSpeed(int nextGear) {
     switch (gear) {
     case 1:
         rotationalSpeed = 130 * speed;
-        if (rotationalSpeed < 800) rand() % 100 + 800; // не очень красивый выход ситуации, когда машина трогается. Обороты не могут быть ниже 700
+        if (rotationalSpeed < 800) rotationalSpeed = (rand() % 100) + 800; // не очень красивый выход ситуации, когда машина трогается. Обороты не могут быть ниже 700
         break;
     case 2:
         rotationalSpeed = 85 * speed;
@@ -53,7 +54,7 @@ void CarDataGenerator::findRotationalSpeed(int nextGear) {
         case 0:
             rotationalSpeed = 130 * speed;
             if (speed == 0) rotationalSpeed = 800;
-            if (rotationalSpeed < 800) rand() % 100 + 800; // не очень красивый выход ситуации, когда машина трогается. Обороты не могут быть ниже 700
+            if (rotationalSpeed < 800) rotationalSpeed = (rand() % 100) + 800; // не очень красивый выход ситуации, когда машина трогается. Обороты не могут быть ниже 700
             break;
         case 1:
             rotationalSpeed = 85 * speed + 100;
@@ -73,7 +74,7 @@ void CarDataGenerator::findRotationalSpeed(int nextGear) {
         switch (gear) {
         case 2:
             rotationalSpeed = 130 * speed - 100;
-            if (rotationalSpeed < 800) rand() % 100 + 800; // не очень красивый выход ситуации, когда машина трогается. Обороты не могут быть ниже 700
+            if (rotationalSpeed < 800) rotationalSpeed = rand() % 100 + 800; // не очень красивый выход ситуации, когда машина трогается. Обороты не могут быть ниже 700
             break;
         case 3:
             rotationalSpeed = 85 * speed - 110;
@@ -90,7 +91,8 @@ void CarDataGenerator::findRotationalSpeed(int nextGear) {
 };
 
 void CarDataGenerator::computeFuelLevel() {
-    fuelLevel = fuelLevel - (getDeltaTime() * getConsumptionFuel() / 3600.0);
+    if (getDeltaTime() < 1) fuelLevel = fuelLevel - ((consumptionFuel / 3600.0) * getDeltaTime());			// ЕСЛИ deltaTime < 1
+    else fuelLevel = fuelLevel - (consumptionFuel / 3600.0);
 };
 void CarDataGenerator::optimalTempurure() {
     temperature = temperature + (rand() % 3 - 1) * ((rand() % 6) / 10.0);
@@ -173,30 +175,55 @@ void CarDataGenerator::computeRotationalSpeed(int nextGear) {
     int lastRotationalSpeed = rotationalSpeed;
     rotationalSpeed = int(6001 * cos(0.065 * consumptionFuel + 4.72));
     if (nextGear == 0) {
-        switch (gear) {		  // ограничеваем резкую смен оборотов для каждой скорости индивидуально
-        case 1:
-            if ((rotationalSpeed - lastRotationalSpeed) > 1000) rotationalSpeed = lastRotationalSpeed + 1200;
-            if ((rotationalSpeed - lastRotationalSpeed) < -1000) rotationalSpeed = lastRotationalSpeed - 500;
-            break;
-        case 2:
-            if ((rotationalSpeed - lastRotationalSpeed) > 750) rotationalSpeed = lastRotationalSpeed + 760;
-            if ((rotationalSpeed - lastRotationalSpeed) < -750) rotationalSpeed = lastRotationalSpeed - 370;
-            break;
-        case 3:
-            if ((rotationalSpeed - lastRotationalSpeed) > 400) rotationalSpeed = lastRotationalSpeed + 450;
-            if ((rotationalSpeed - lastRotationalSpeed) < -400) rotationalSpeed = lastRotationalSpeed - 200;
-            break;
-        case 4:
-            if ((rotationalSpeed - lastRotationalSpeed) > 310) rotationalSpeed = lastRotationalSpeed + 300;
-            if ((rotationalSpeed - lastRotationalSpeed) < -310) rotationalSpeed = lastRotationalSpeed - 160;
-            break;
-        case 5:
-            if ((rotationalSpeed - lastRotationalSpeed) > 260) rotationalSpeed = lastRotationalSpeed + 250;
-            if ((rotationalSpeed - lastRotationalSpeed) < -260) rotationalSpeed = lastRotationalSpeed - 150;
-            break;
+        if (getDeltaTime() >= 1) {
+            switch (gear) {		  // ограничеваем резкую смен оборотов для каждой скорости индивидуально ПРИ ШАГЕ >= 1!!!!
+            case 1:
+                if ((rotationalSpeed - lastRotationalSpeed) > 1000) rotationalSpeed = lastRotationalSpeed + 1200;
+                if ((rotationalSpeed - lastRotationalSpeed) < -1000) rotationalSpeed = lastRotationalSpeed - 500;
+                break;
+            case 2:
+                if ((rotationalSpeed - lastRotationalSpeed) > 750) rotationalSpeed = lastRotationalSpeed + 760;
+                if ((rotationalSpeed - lastRotationalSpeed) < -750) rotationalSpeed = lastRotationalSpeed - 370;
+                break;
+            case 3:
+                if ((rotationalSpeed - lastRotationalSpeed) > 400) rotationalSpeed = lastRotationalSpeed + 450;
+                if ((rotationalSpeed - lastRotationalSpeed) < -400) rotationalSpeed = lastRotationalSpeed - 200;
+                break;
+            case 4:
+                if ((rotationalSpeed - lastRotationalSpeed) > 310) rotationalSpeed = lastRotationalSpeed + 300;
+                if ((rotationalSpeed - lastRotationalSpeed) < -310) rotationalSpeed = lastRotationalSpeed - 160;
+                break;
+            case 5:
+                if ((rotationalSpeed - lastRotationalSpeed) > 260) rotationalSpeed = lastRotationalSpeed + 250;
+                if ((rotationalSpeed - lastRotationalSpeed) < -260) rotationalSpeed = lastRotationalSpeed - 150;
+                break;
+            }
+        }
+        else {
+            switch (gear) {		  // ограничеваем резкую смен оборотов для каждой скорости индивидуально ПРИ ШАГЕ < 1!!!!
+            case 1:
+                if ((rotationalSpeed - lastRotationalSpeed) > (1000 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed + (1200 * getDeltaTime());
+                if ((rotationalSpeed - lastRotationalSpeed) < -(1000 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed - (500 * getDeltaTime());
+                break;
+            case 2:
+                if ((rotationalSpeed - lastRotationalSpeed) > (750 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed + (760 * getDeltaTime());
+                if ((rotationalSpeed - lastRotationalSpeed) < -(750 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed - (370 * getDeltaTime());
+                break;
+            case 3:
+                if ((rotationalSpeed - lastRotationalSpeed) > (400 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed + (450 * getDeltaTime());
+                if ((rotationalSpeed - lastRotationalSpeed) < -(400 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed - (200 * getDeltaTime());
+                break;
+            case 4:
+                if ((rotationalSpeed - lastRotationalSpeed) > (310 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed + (300 * getDeltaTime());
+                if ((rotationalSpeed - lastRotationalSpeed) < (-310 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed - (160 * getDeltaTime());
+                break;
+            case 5:
+                if ((rotationalSpeed - lastRotationalSpeed) > (260 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed + (250 * getDeltaTime());
+                if ((rotationalSpeed - lastRotationalSpeed) < -(260 * getDeltaTime())) rotationalSpeed = lastRotationalSpeed - (150 * getDeltaTime());
+                break;
+            }
         }
     }
-
     static bool haveRotationalSpeed = 0;
     if (!haveRotationalSpeed) {					//при первом попадании в метод обороты "подхватываются" от скорости
         findRotationalSpeed(0);
@@ -215,17 +242,22 @@ void CarDataGenerator::computeGear(int nextGear) {
     if (nextGear == 3) { gear = 0; }
 };
 void CarDataGenerator::computeConsumptionFuel(int nextGear) {
-    static double target = rand() % 25;
     static double deltaConsumptionFuel = rand() % 7 + (rand() % 10 / 10.0);
-    static int index = 0;
-    index = index + 1;
-    if (index % 20 == 0) {				//параметры обновляются раз в 30 обновлений, итераций, дельтаТайм
-        index = 0;
+    static int  counter = 0;
+    if (int(getTime()) % 20 == 0) {				//параметры обновляются раз в 15 секунд
         target = rand() % 25;
+        if (gear == 5) 	counter++;
         do {
-            deltaConsumptionFuel = rand() % 7 + (rand() % 10 / 10.0);
+            deltaConsumptionFuel = rand() % 6 + (rand() % 10 / 10.0);
+            if (getDeltaTime() < 1) deltaConsumptionFuel = deltaConsumptionFuel * getDeltaTime(); // Если deltaTime < 1
         } while (deltaConsumptionFuel == 0);
+        if (counter > 0) { //если слишком долго едем на 5 скорости убавляем расход, чтобы было динамичнее
+            target = 3;
+            deltaConsumptionFuel = 2;
+            counter = 0;
+        }
     }
+    if (target <= 2) deltaConsumptionFuel = 1; //делаем остановку чуть более реальной
     if (consumptionFuel > target) consumptionFuel = consumptionFuel - deltaConsumptionFuel;
     if (consumptionFuel < target) consumptionFuel = consumptionFuel + deltaConsumptionFuel;
     if (nextGear != 0) {						// высчитывание расхода ТОЛЬКО ПРИ ПЕРЕКЛЮЧЕНИИ ПЕРЕДАЧИ
@@ -238,6 +270,8 @@ void CarDataGenerator::computeConsumptionFuel(int nextGear) {
     }
     if (consumptionFuel >= 24) consumptionFuel = 24;  // защита от слишком больших оборотов
     if (((fuelLevel >= 1) && (speed != 0)) && ((consumptionFuel < 2) && (gear != 1)))  consumptionFuel = 2; //машина едет, водитель бросает газ. Чтобы она не заглохла.
+    //cout << "Должно потребляться: " << target << "\t";
+    //cout << "Шаг потребления: " << deltaConsumptionFuel << endl;
 };
 
 void CarDataGenerator::engineOff(double *startTemperature) {
@@ -248,7 +282,8 @@ void CarDataGenerator::engineOff(double *startTemperature) {
     if ((-10 <= *startTemperature) && (*startTemperature < 0)) koefficient = 0.04;
     if (-10 > *startTemperature) koefficient = 0.06;
     if (int(temperature) > int(*startTemperature)) {
-        temperature = temperature - (koefficient * getDeltaTime());
+        if (getDeltaTime() < 1) koefficient = koefficient * getDeltaTime();		// ЕСЛИ deltaTime < 1
+        temperature = temperature - koefficient;
     }
     gear = 0;
     consumptionFuel = 0;
@@ -256,28 +291,81 @@ void CarDataGenerator::engineOff(double *startTemperature) {
     rotationalSpeed = 0;
     if (speed != 0) {
         startSpeed = speed;
-        speed = startSpeed - getDeltaTime() * 1.2;
+        speed = startSpeed - 1.2;
         if (speed < 0) speed = 0;
     }
-    ///cout << "Время: " << getTime() << "\t";									//отладочная строка
-    ///cout << "Температура: " << int(temperature) << "\t\t";					//отладочная строка
-    ///cout << "Уровень топлива: " << int(fuelLevel) << "\t";					//отладочная строка
-    ///cout << "Расход: " << consumptionFuel << "\t";							//отладочная строка
-    ///cout << "Обороты: " << int(rotationalSpeed) << "\t";					//отладочная строка
-    ///cout << "Скорость: " << int(speed) << "\t";								//отладочная строка
-    ///cout << "Передача: " << gear << endl;									//отладочная строка
+    if (getDeltaTime() < 1) speed = speed * getDeltaTime();
+    ///printEverySecond();			//ОТЛАДОЧНАЯ СТРОКА
 };
 bool CarDataGenerator::engineOn() {
     static bool engineOn = 1;
     if ((fuelLevel < 1) || (consumptionFuel < 1.7)) engineOn = 0;
     if (((fuelLevel > 1) && (engineOn == 0)) && (getTime() > 0)) {
-        if (rand() % 11 > 7) consumptionFuel = rand() % 10;
-        if (consumptionFuel >= 2)
+        if (int(getTime()) % 10 == 0) {
             engineOn = 1;
+            consumptionFuel = 1.8;
+            target = 10;
+        }
     }
     return engineOn;
 };
+void CarDataGenerator::synchronization() {
+    static double startTemperature = temperature;				// начальная температура, чтобы было к чему вернуться
+    double *pStartTemperature = &startTemperature;
+    static int nextGear;										// флаг о переключении скорости
+    if (engineOn()) {
+        static bool first = 0;
 
+        if (first == 0) computeGear(0);
+        if (nextGear != 0) {
+            findRotationalSpeed(nextGear);
+        }
+        if (first) {											//в первый проход по методу, генерация не должна сработать
+            computeConsumptionFuel(nextGear);					//не зависит ни от чего (только от передачи при переключении)
+            computeTemperature();								//зависит от потребления топлива
+            computeFuelLevel();									//зависит от потребления топлива
+        }
+
+        if (nextGear == 0) computeRotationalSpeed(nextGear);			//зависит от потребления топлива
+        computeGear(nextGear);											//зависит от оборотов
+        nextGear = 0;													//остаться на той же
+        if ((gear == 0) && (consumptionFuel > 2)) { nextGear = 1; }		// старт
+        if ((rotationalSpeed > 3100) && (gear < 5)) { nextGear = 1; }	//следующая скорость
+        if ((rotationalSpeed < 1900) && (gear > 1)) { nextGear = 2; }	//предыдущая скорость
+        if ((gear == 1) && (consumptionFuel < 2)) { nextGear = 3; }		//нейтраль, но двигатель работает
+        if (first)	computeSpeed(gear);									//зависит от передачи и оборотов
+        first = true;
+        //printEverySecond();
+    }
+    else {
+        engineOff(pStartTemperature);
+    }
+    if (getDeltaTime() < 1) setTime(getTime() + getDeltaTime());
+    else setTime(getTime() + 1);
+};
+
+void CarDataGenerator::printEverySecond() {
+    cout << endl;
+    cout << "Время: " << getTime() << "\t";
+    cout << "Температура: " << int(temperature) << "\t\t";					//отладочная строка
+    cout << "Уровень топлива: " << int(fuelLevel) << "\t";					//отладочная строка
+    cout << "Расход: " << consumptionFuel << "\t";							//отладочная строка
+    cout << "Обороты: " << int(rotationalSpeed) << "\t";					//отладочная строка
+    cout << "Скорость: " << int(speed) << "\t";								//отладочная строка
+    cout << "Передача: " << gear << endl;									//отладочная строка
+};
+void CarDataGenerator::printFinalyValues() {
+    cout << endl;
+    cout << "							ИТОГОВЫЕ ЗНАЧЕНИЯ " << endl;
+    cout << "Время: " << getTime() << "\t";
+    cout << "Температура: " << int(temperature) << "\t\t";					//отладочная строка
+    cout << "Уровень топлива: " << int(fuelLevel) << "\t";					//отладочная строка
+    cout << "Расход: " << consumptionFuel << "\t";							//отладочная строка
+    cout << "Обороты: " << int(rotationalSpeed) << "\t";					//отладочная строка
+    cout << "Скорость: " << int(speed) << "\t";								//отладочная строка
+    cout << "Передача: " << gear << endl;									//отладочная строка
+    cout << endl;
+};
 
 void CarDataGenerator::setSpeed(double speed) {
     this->speed = speed;
@@ -317,7 +405,7 @@ int CarDataGenerator::getGear() {
     return gear;
 };
 
-CarDataGenerator::CarDataGenerator(int deltaTime) {
+CarDataGenerator::CarDataGenerator(double deltaTime) {
     srand(std::time(NULL));
     setTime(0);
     setDeltaTime(deltaTime);
@@ -325,65 +413,38 @@ CarDataGenerator::CarDataGenerator(int deltaTime) {
     fuelLevel = rand() % 51;				// топливо до 50 литров
     temperature = rand() % 111 - 25;		// начальная температура дивгателя от -25 до 85
     consumptionFuel = 2 + (rand() % 20);	// начальный расход топлива л/час до 21.
+    target = rand() % 22 + 2;
 };
-CarDataGenerator::CarDataGenerator(int deltaTime, double speed, double fuelLevel, double temperature, double consumptionFuel, double rotationalSpped) {
+CarDataGenerator::CarDataGenerator(double deltaTime, double speed, double fuelLevel, double temperature, double rotationalSpeed) {
     setTime(0);
     setDeltaTime(deltaTime);
     this->speed = speed;
     this->fuelLevel = fuelLevel;
     this->temperature = temperature;
-    this->consumptionFuel = consumptionFuel;
-    this->rotationalSpeed;
+    consumptionFuel = 2 + (rand() % 20);
+    target = rand() % 22 + 2;
+    this->rotationalSpeed = rotationalSpeed;
 };
-CarDataGenerator::CarDataGenerator(int deltaTime, double minSpeed, double maxSpeed, double minFuelLevel, double maxFuelLevel, double minTemperature, double maxTemperature, double minConsumptionFuel, double maxConsumptionFuel, double minRotationalSpeed, double maxRotationalSpeed) {
+CarDataGenerator::CarDataGenerator(double deltaTime, double minSpeed, double maxSpeed, double minFuelLevel, double maxFuelLevel, double minTemperature, double maxTemperature, double minRotationalSpeed, double maxRotationalSpeed) {
         srand(std::time(NULL));
         setTime(0);
         setDeltaTime(deltaTime);
         this->speed = minSpeed + rand() % int(maxSpeed - minSpeed);
         this->fuelLevel = minFuelLevel + rand() % int(maxFuelLevel - minFuelLevel);
         this->temperature = minTemperature + rand() % int(maxTemperature - minTemperature);
-        this->consumptionFuel = minConsumptionFuel + rand() % int(maxConsumptionFuel - minConsumptionFuel);
+        consumptionFuel = 2 + (rand() % 20);
         this->rotationalSpeed = minRotationalSpeed + rand() % int(maxRotationalSpeed - minRotationalSpeed);
+        target = rand() % 22 + 2;
     };
 
-void  CarDataGenerator::compute(){
-    static double startTemperature = temperature;				// начальная температура, чтобы было к чему вернуться
-    double *pStartTemperature = &startTemperature;
-    static int nextGear;										// флаг о переключении скорости
-    if (engineOn()) {
-        static bool first = 0;
-
-        if (first == 0) computeGear(0);
-        if (nextGear != 0) {
-            findRotationalSpeed(nextGear);
-        }
-        if (first) {											//в первый проход по методу, генерация не должна сработать
-            computeConsumptionFuel(nextGear);					//не зависит ни от чего (только от передачи при переключении)
-            computeTemperature();								//зависит от потребления топлива
-            computeFuelLevel();									//зависит от потребления топлива
-        }
-
-        if (nextGear == 0) computeRotationalSpeed(nextGear);			//зависит от потребления топлива
-        computeGear(nextGear);											//зависит от оборотов
-        nextGear = 0;													//остаться на той же
-        if ((gear == 0) && (consumptionFuel > 2)) { nextGear = 1; }		// старт
-        if ((rotationalSpeed > 3100) && (gear < 5)) { nextGear = 1; }	//следующая скорость
-        if ((rotationalSpeed < 1900) && (gear > 1)) { nextGear = 2; }	//предыдущая скорость
-        if ((gear == 1) && (consumptionFuel < 2)) { nextGear = 3; }		//нейтраль, но двигатель работает
-        if (first)	computeSpeed(gear);									//зависит от передачи и оборотов
-        first = true;
-        /// cout << "Time: " << getTime() << "\t";									//отладочная строка
-        /// cout << "Temperature: " << int(temperature) << "\t\t";					//отладочная строка
-        ///cout << "Fuel level: " << int(fuelLevel) << "\t";					//отладочная строка
-        ///cout << "Consumption: " << consumptionFuel << "\t";							//отладочная строка
-        ///cout << "Ratational speed: " << int(rotationalSpeed) << "\t";						//отладочная строка
-        ///cout << "Speed: " << int(speed) << "\t";								//отладочная строка
-        ///cout << "Transmition: " << gear << endl;									//отладочная строка
-    }
+void CarDataGenerator::compute() {
+    if (getDeltaTime() < 1) synchronization();
     else {
-        engineOff(pStartTemperature);
+    for (int i = 0; i < getDeltaTime(); i++)
+    {
+        synchronization();
     }
-    setTime(getTime() + getDeltaTime());
+}
+    ///printFinalyValues();
 };
-
 CarDataGenerator::~CarDataGenerator() {};

@@ -2,8 +2,6 @@
 #define CARDATAGENERATOR_H
 #include "DataGenerator.h"
 
-#include "DataGenerator.h"
-
 class CarDataGenerator : public DataGenerator {
     double speed;
     double fuelLevel;
@@ -11,8 +9,11 @@ class CarDataGenerator : public DataGenerator {
     double rotationalSpeed;
     double consumptionFuel;
     int gear;
+    double target;
 
-protected:
+    void printEverySecond();			//чисто отладочный метод
+    void printFinalyValues();			//чисто отладочный метод
+
     void findGear();
     void findRotationalSpeed(int nextGear);
 
@@ -26,8 +27,8 @@ protected:
 
     void engineOff(double *startTemperature);
     bool engineOn();
+    void synchronization();
 
-public:
     void setSpeed(double speed);
     void setFuelLevel(double fuelLevel);
     void setTemperatur(double temperature);
@@ -35,6 +36,7 @@ public:
     void setConsumptionFuel(double consumptionFuel);
     void setGear(int gear);
 
+public:
     double getSpeed();
     double getFuelLevel();
     double getTemperatur();
@@ -42,11 +44,11 @@ public:
     double getConsumptionFuel();
     int getGear();
 
-    CarDataGenerator(int deltaTime);
-    CarDataGenerator(int deltaTime, double speed, double fuelLevel, double temperature, double consumptionFuel, double rotationalSpeed);
-    CarDataGenerator(int deltaTime, double minSpeed, double maxSpeed, double minFuelLevel, double maxFuelLevel, double minTemperature, double maxTemperature, double minConsumptionFuel, double maxConsumptionFuel, double minRotationalSpeed, double maxRotationalSpeed);
+    CarDataGenerator(double deltaTime);
+    CarDataGenerator(double deltaTime, double speed, double fuelLevel, double temperature, double rotationalSpeed);
+    CarDataGenerator(double deltaTime, double minSpeed, double maxSpeed, double minFuelLevel, double maxFuelLevel, double minTemperature, double maxTemperature, double minRotationalSpeed, double maxRotationalSpeed);
 
-    void compute() override;
+    void  compute() override;
 
     ~CarDataGenerator()override;
 };

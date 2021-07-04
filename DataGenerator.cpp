@@ -1,6 +1,6 @@
 #include "DataGenerator.h"
 
-void DataGenerator::setTime(int time)
+void DataGenerator::setTime(double time)
 {
     this->time = time;
 };
@@ -17,7 +17,7 @@ double DataGenerator::getDeltaTime()
 {
     return deltaTime;
 }
-int DataGenerator::getTime()
+double DataGenerator::getTime()
 {
     return time;
 }
