@@ -9,6 +9,8 @@ CppApplication {
         "DataGenerator.h",
         "HarmonicMotionDataGenerator.cpp",
         "HarmonicMotionDataGenerator.h",
+        "PlaneDataGenerator.cpp",
+        "PlaneDataGenerator.h",
         "main.cpp",
     ]
 
